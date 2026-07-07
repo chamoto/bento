@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+bento_auto_order/.env
+bento_auto_order/.venv/
+bento_auto_order/dist/
+bento_auto_order/build/
+bento_auto_order/*.spec
