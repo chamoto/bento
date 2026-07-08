@@ -36,8 +36,6 @@ BASE_COLUMNS = {
     "備考",
     "メモ",
 }
-TIMESTAMP_COLUMNS = {"timestamp", "タイムスタンプ"}
-NAME_COLUMNS = {"name", "氏名", "名前"}
 LEGACY_DAY_KEYS = ["day1", "day2", "day3", "day4"]
 SKIP_VALUES = {"", "なし", "不要", "未選択", "nan", "none", "null"}
 FULL_WIDTH_DIGITS = str.maketrans("０１２３４５６７８９", "0123456789")
@@ -49,12 +47,7 @@ def load_orders(csv_path: str | Path) -> pd.DataFrame:
         raise FileNotFoundError(f"CSVファイルが見つかりません: {path}")
 
     df = read_orders_csv(path)
-    normalized_columns = {column.strip().lstrip("\ufeff") for column in df.columns}
-    if not normalized_columns.intersection(TIMESTAMP_COLUMNS):
-        raise ValueError("CSVに必須カラムがありません: timestamp または タイムスタンプ")
-    if not normalized_columns.intersection(NAME_COLUMNS):
-        raise ValueError("CSVに必須カラムがありません: name または 氏名")
-
+    get_order_columns(df)
     return df
 
 
