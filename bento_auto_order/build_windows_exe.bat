@@ -21,6 +21,7 @@ pyinstaller ^
   --add-data "ajiya_sample_orders.csv;." ^
   --add-data "sample_orders.csv;." ^
   --add-data "google_form_sample_orders.csv;." ^
+  --add-data "google_form_count_result.csv;." ^
   qt_app.py
 
 echo.

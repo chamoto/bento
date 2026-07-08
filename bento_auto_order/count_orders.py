@@ -42,10 +42,14 @@ if __name__ == "__main__":
         output: Path | None = None
         if "--output" in args:
             output_index = args.index("--output")
+            if output_index + 1 >= len(args):
+                raise ValueError("--output の後に出力CSVパスを指定してください。")
             output = Path(args[output_index + 1])
             del args[output_index : output_index + 2]
         if "-o" in args:
             output_index = args.index("-o")
+            if output_index + 1 >= len(args):
+                raise ValueError("-o の後に出力CSVパスを指定してください。")
             output = Path(args[output_index + 1])
             del args[output_index : output_index + 2]
 

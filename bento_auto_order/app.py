@@ -174,7 +174,7 @@ def ensure_env_exists() -> None:
 
 
 def ensure_default_files_exist() -> None:
-    for file_name in ["ajiya_sample_orders.csv", "sample_orders.csv", "google_form_sample_orders.csv"]:
+    for file_name in ["ajiya_sample_orders.csv", "sample_orders.csv", "google_form_sample_orders.csv", "google_form_count_result.csv"]:
         destination = APP_DIR / file_name
         source = RESOURCE_DIR / file_name
         if not destination.exists() and source.exists():

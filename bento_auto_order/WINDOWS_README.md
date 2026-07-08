@@ -39,8 +39,13 @@ ORDER_SITE_LOGIN_URL=https://example.com/login
 ORDER_SITE_USERNAME=your_username
 ORDER_SITE_PASSWORD=your_password
 ORDER_SITE_ORDER_URL=https://example.com/order
+ORDER_BROWSER_CHANNEL=chrome
+ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000
 CSV_PATH=ajiya_sample_orders.csv
 ```
+
+Chromeを起動できない場合は、Microsoft Edgeへ自動で切り替えます。
+ID・パスワードを空にした場合は、ブラウザで手動ログインしてください。GUI版では `ORDER_SITE_MANUAL_LOGIN_WAIT_MS` の時間だけ待ってから注文ページへ進みます。
 
 ## 5. 起動
 
@@ -48,21 +53,23 @@ CSV_PATH=ajiya_sample_orders.csv
 
 GUIアプリが開きます。
 
-- `Open CSV`: CSVをExcelなどで開く
-- `Choose`: 別のCSVを選ぶ
-- `Refresh Summary`: 集計を確認する
-- `Edit Settings`: `.env` を開く
-- `Run Browser Input`: ブラウザを開いて注文ページへ入力する
+- `CSVを開く`: CSVをExcelなどで開く
+- `CSVを選ぶ`: 別のCSVを選ぶ
+- `集計`: 集計を確認する
+- `設定を開く`: `.env` を開く
+- `ログを開く`: 実行ログを開く
+- `自動入力`: ブラウザを開いて注文ページへ入力する
 
 注文確定ボタンは自動で押しません。最後は必ず人間が画面を確認して、手動で確定してください。
 
 ## CSVだけ開きたい場合
 
-GUIの `Open CSV` を押してください。
+GUIの `CSVを開く` を押してください。
 
 `.env` の `CSV_PATH` に設定されたCSVを開きます。未設定の場合は `ajiya_sample_orders.csv` を開きます。
 
 CSVはWindows Excelで文字化けしにくい `UTF-8 BOM付き` で保存しています。
+読み込みは `UTF-8 BOM付き`、`UTF-8`、`Shift_JIS(CP932)` に対応しています。
 
 ## exe化したい場合
 
@@ -80,4 +87,4 @@ build_windows_exe.bat
 dist\BentoAutoOrder.exe
 ```
 
-Google Chrome自体は同梱しないので、利用者のWindows PCにChromeを入れてください。
+Google Chrome自体は同梱しません。Chromeが無い場合はMicrosoft Edgeを使います。

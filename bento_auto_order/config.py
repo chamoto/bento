@@ -40,6 +40,7 @@ ORDER_SITE_PASSWORD = ""
 DAY_URLS: dict[str, str] = {}
 DAILY_URL_TEMPLATE = ""
 BROWSER_CHANNEL = "chrome"
+MANUAL_LOGIN_WAIT_MS = 60_000
 
 
 def load_settings() -> None:
@@ -51,6 +52,7 @@ def load_settings() -> None:
     global DAY_URLS
     global DAILY_URL_TEMPLATE
     global BROWSER_CHANNEL
+    global MANUAL_LOGIN_WAIT_MS
 
     load_dotenv(BASE_DIR / ".env", override=True)
 
@@ -71,6 +73,10 @@ def load_settings() -> None:
     DAILY_URL_TEMPLATE = env_value("ORDER_SITE_DAILY_URL_TEMPLATE")
     ORDER_URL = env_value("ORDER_SITE_ORDER_URL", DAY_URLS.get("day1") or LOGIN_URL)
     BROWSER_CHANNEL = env_value("ORDER_BROWSER_CHANNEL", "chrome")
+    try:
+        MANUAL_LOGIN_WAIT_MS = int(env_value("ORDER_SITE_MANUAL_LOGIN_WAIT_MS", "60000"))
+    except ValueError:
+        MANUAL_LOGIN_WAIT_MS = 60_000
 
 
 load_settings()

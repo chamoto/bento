@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -9,9 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent
 import pandas as pd
 
 try:
+    from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
     from playwright.sync_api import sync_playwright
 except ModuleNotFoundError:
+    PlaywrightError = Exception
     PlaywrightTimeoutError = TimeoutError
     sync_playwright = None
 
@@ -45,7 +48,7 @@ def load_orders(csv_path: str | Path) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"CSVファイルが見つかりません: {path}")
 
-    df = pd.read_csv(path, dtype=str, keep_default_na=False)
+    df = read_orders_csv(path)
     normalized_columns = {column.strip().lstrip("\ufeff") for column in df.columns}
     if not normalized_columns.intersection(TIMESTAMP_COLUMNS):
         raise ValueError("CSVに必須カラムがありません: timestamp または タイムスタンプ")
@@ -53,6 +56,19 @@ def load_orders(csv_path: str | Path) -> pd.DataFrame:
         raise ValueError("CSVに必須カラムがありません: name または 氏名")
 
     return df
+
+
+def read_orders_csv(path: Path) -> pd.DataFrame:
+    last_error: Exception | None = None
+    for encoding in ("utf-8-sig", "utf-8", "cp932"):
+        try:
+            return pd.read_csv(path, dtype=str, keep_default_na=False, encoding=encoding)
+        except UnicodeDecodeError as exc:
+            last_error = exc
+
+    raise RuntimeError(
+        f"CSVの文字コードを読み取れませんでした: {path}. UTF-8 または Shift_JIS(CP932) で保存してください。"
+    ) from last_error
 
 
 def get_order_columns(df: pd.DataFrame) -> list[str]:
@@ -138,6 +154,10 @@ def sort_bento_no(value: str) -> tuple[int, int | str]:
     return (1, value)
 
 
+def is_gui_mode() -> bool:
+    return os.getenv("BENTO_AUTO_ORDER_GUI", "").strip() == "1" or getattr(sys, "frozen", False)
+
+
 def login(page) -> None:
     if not config.LOGIN_URL:
         raise ValueError("ORDER_SITE_LOGIN_URL が未設定です。.env を確認してください。")
@@ -151,8 +171,14 @@ def login(page) -> None:
 
     if not config.ORDER_SITE_USERNAME or not config.ORDER_SITE_PASSWORD:
         print("\nORDER_SITE_USERNAME または ORDER_SITE_PASSWORD が空です。")
-        print("ブラウザで手動ログインしてください。ログイン後、ターミナルで Enter を押すと続行します。")
-        input("手動ログインが終わったら Enter: ")
+        print("ブラウザで手動ログインしてください。")
+        if sys.stdin and sys.stdin.isatty() and not is_gui_mode():
+            input("手動ログインが終わったら Enter: ")
+        else:
+            wait_seconds = max(1, config.MANUAL_LOGIN_WAIT_MS // 1000)
+            print(f"Windowsアプリ実行中のため、Enter入力は使いません。{wait_seconds}秒待ってから注文ページへ進みます。")
+            print("待ち時間が足りない場合は .env の ORDER_SITE_MANUAL_LOGIN_WAIT_MS を増やしてください。")
+            page.wait_for_timeout(config.MANUAL_LOGIN_WAIT_MS)
         return
 
     page.fill(site_selectors.USERNAME_INPUT_SELECTOR, config.ORDER_SITE_USERNAME)
@@ -288,8 +314,42 @@ def get_available_bento_numbers(page) -> list[str]:
 
 def wait_for_human_review(page, browser) -> None:
     print("ブラウザを開いたまま待機します。内容確認後、ブラウザを手動で閉じてください。")
-    while browser.is_connected() and not page.is_closed():
-        page.wait_for_timeout(1_000)
+    while True:
+        try:
+            if not browser.is_connected() or page.is_closed():
+                break
+            page.wait_for_timeout(1_000)
+        except PlaywrightError:
+            break
+    print("ブラウザが閉じられたため、待機を終了します。")
+
+
+def launch_visible_browser(playwright):
+    channel_candidates: list[str] = []
+    if config.BROWSER_CHANNEL:
+        channel_candidates.append(config.BROWSER_CHANNEL)
+    if sys.platform == "win32" and "msedge" not in channel_candidates:
+        channel_candidates.append("msedge")
+
+    last_error: Exception | None = None
+    for channel in channel_candidates:
+        try:
+            print(f"ブラウザ channel={channel} で起動します。")
+            return playwright.chromium.launch(headless=False, channel=channel)
+        except Exception as exc:
+            print(f"ブラウザ channel={channel} を起動できませんでした: {exc}")
+            last_error = exc
+
+    if not getattr(sys, "frozen", False):
+        try:
+            print("Playwright Chromiumで起動します。")
+            return playwright.chromium.launch(headless=False)
+        except Exception as exc:
+            last_error = exc
+
+    raise RuntimeError(
+        "ブラウザを起動できませんでした。Windowsでは Google Chrome または Microsoft Edge をインストールしてください。"
+    ) from last_error
 
 
 def run() -> None:
@@ -305,17 +365,7 @@ def run() -> None:
     print_total_summary(aggregated)
 
     with sync_playwright() as playwright:
-        launch_options = {"headless": False}
-        if config.BROWSER_CHANNEL:
-            launch_options["channel"] = config.BROWSER_CHANNEL
-
-        try:
-            browser = playwright.chromium.launch(**launch_options)
-        except Exception:
-            if not config.BROWSER_CHANNEL:
-                raise
-            print(f"Chrome channel '{config.BROWSER_CHANNEL}' が使えないため、Playwright Chromiumで再試行します。")
-            browser = playwright.chromium.launch(headless=False)
+        browser = launch_visible_browser(playwright)
         context = browser.new_context()
         page = context.new_page()
 

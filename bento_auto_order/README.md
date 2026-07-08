@@ -54,10 +54,14 @@ ORDER_SITE_LOGIN_URL=https://example.com/login
 ORDER_SITE_USERNAME=your_username
 ORDER_SITE_PASSWORD=your_password
 ORDER_SITE_ORDER_URL=https://example.com/order
+ORDER_BROWSER_CHANNEL=chrome
+ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000
 CSV_PATH=sample_orders.csv
 ```
 
 `CSV_PATH` を空にした場合は、同じフォルダの `sample_orders.csv` を読み込みます。
+Windowsでは `ORDER_BROWSER_CHANNEL=chrome` を優先し、Chromeを起動できない場合は Microsoft Edge に切り替えます。
+ID・パスワードを空にした場合、GUI版では `ORDER_SITE_MANUAL_LOGIN_WAIT_MS` の時間だけ手動ログインを待ってから注文ページへ進みます。
 
 ## 実行方法
 
@@ -66,6 +70,8 @@ GUIで使う場合:
 ```bash
 python qt_app.py
 ```
+
+GUIの `ログを開く` ボタンから、Windowsでの実行ログを確認できます。
 
 CLIで直接実行する場合:
 
