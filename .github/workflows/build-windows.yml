@@ -48,13 +48,9 @@ jobs:
           Copy-Item WINDOWS_README.md dist\BentoAutoOrder-windows\WINDOWS_README.md
           Copy-Item .env.example dist\BentoAutoOrder-windows\.env.example
 
-      - name: Zip Windows app
-        shell: pwsh
-        run: |
-          Compress-Archive -Path dist\BentoAutoOrder-windows -DestinationPath dist\BentoAutoOrder-windows.zip -Force
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: BentoAutoOrder-windows
-          path: bento_auto_order/dist/BentoAutoOrder-windows.zip
+          path: bento_auto_order/dist/BentoAutoOrder-windows
+          include-hidden-files: true

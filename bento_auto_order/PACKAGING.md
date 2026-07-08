@@ -51,10 +51,10 @@ After pushing to `main`, open GitHub Actions and download the artifact:
 BentoAutoOrder-windows
 ```
 
-Inside the downloaded zip, run:
+Unzip the downloaded artifact and run:
 
 ```text
-BentoAutoOrder-windows\BentoAutoOrder.exe
+BentoAutoOrder.exe
 ```
 
 ## Build on Mac
