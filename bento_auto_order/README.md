@@ -1,8 +1,10 @@
 # Bento Auto Order
 
-Googleフォームの回答CSVを読み込み、4日分の弁当番号ごとの数量を集計し、Playwrightで注文サイトの数量欄へ自動入力するPythonアプリです。
+Googleフォームの回答CSVを読み込み、弁当番号ごとの数量を集計し、Playwrightで注文サイトの数量欄へ自動入力するPythonアプリです。
 
 注文確定ボタンは自動クリックしません。入力後はブラウザを開いたまま停止するので、必ず人間が内容を確認してから手動で確定してください。
+
+Windows / Mac 両対応のGUI入口として `app.py` を用意しています。
 
 ## セットアップ
 
@@ -20,9 +22,20 @@ Windows:
 
 1. `setup_windows.bat` をダブルクリック
 2. `.env` を編集
-3. `run_windows.bat` をダブルクリック
+3. `start_app_windows.bat` をダブルクリック
 
 詳しくは `WINDOWS_README.md` を見てください。
+
+Mac:
+
+```bash
+cd bento_auto_order
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium
+python app.py
+```
 
 ## .env の作り方
 
@@ -48,6 +61,14 @@ CSV_PATH=sample_orders.csv
 `CSV_PATH` を空にした場合は、同じフォルダの `sample_orders.csv` を読み込みます。
 
 ## 実行方法
+
+GUIで使う場合:
+
+```bash
+python app.py
+```
+
+CLIで直接実行する場合:
 
 ```bash
 python main.py

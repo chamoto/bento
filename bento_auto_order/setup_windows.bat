@@ -41,5 +41,5 @@ if not exist ".env" (
 
 echo.
 echo Setup complete.
-echo Edit .env, then run run_windows.bat.
+echo Edit .env, then run start_app_windows.bat.
 pause

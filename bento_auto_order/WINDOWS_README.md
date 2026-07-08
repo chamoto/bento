@@ -47,17 +47,25 @@ CSV_PATH=ajiya_sample_orders.csv
 
 ## 5. 起動
 
-`run_windows.bat` をダブルクリックします。
+`start_app_windows.bat` をダブルクリックします。
 
-ブラウザが開き、CSVの集計結果を注文ページへ入力します。
+GUIアプリが開きます。
+
+- `Open CSV`: CSVをExcelなどで開く
+- `Choose`: 別のCSVを選ぶ
+- `Refresh Summary`: 集計を確認する
+- `Edit Settings`: `.env` を開く
+- `Run Browser Input`: ブラウザを開いて注文ページへ入力する
 
 注文確定ボタンは自動で押しません。最後は必ず人間が画面を確認して、手動で確定してください。
 
 ## CSVだけ開きたい場合
 
-`CSVを開く.bat` をダブルクリックしてください。
+GUIの `Open CSV` を押してください。
 
 `.env` の `CSV_PATH` に設定されたCSVを開きます。未設定の場合は `ajiya_sample_orders.csv` を開きます。
+
+CSVはWindows Excelで文字化けしにくい `UTF-8 BOM付き` で保存しています。
 
 ## exe化したい場合
 
