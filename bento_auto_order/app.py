@@ -13,6 +13,7 @@ import main
 
 
 APP_DIR = config.BASE_DIR
+RESOURCE_DIR = config.RESOURCE_DIR
 ENV_PATH = APP_DIR / ".env"
 DEFAULT_CSV_PATH = APP_DIR / "ajiya_sample_orders.csv"
 
@@ -164,10 +165,20 @@ def format_summary(aggregated: dict[str, dict[str, int]]) -> str:
 
 
 def ensure_env_exists() -> None:
+    APP_DIR.mkdir(parents=True, exist_ok=True)
+    ensure_default_files_exist()
     if ENV_PATH.exists():
         return
-    example_path = APP_DIR / ".env.example"
+    example_path = RESOURCE_DIR / ".env.example"
     ENV_PATH.write_text(example_path.read_text(encoding="utf-8"), encoding="utf-8")
+
+
+def ensure_default_files_exist() -> None:
+    for file_name in ["ajiya_sample_orders.csv", "sample_orders.csv"]:
+        destination = APP_DIR / file_name
+        source = RESOURCE_DIR / file_name
+        if not destination.exists() and source.exists():
+            destination.write_bytes(source.read_bytes())
 
 
 def open_file(path: Path) -> None:

@@ -12,13 +12,26 @@ source ".venv/bin/activate"
 pip install -r requirements-build.txt
 
 pyinstaller \
+  -y \
+  --clean \
   --name BentoAutoOrder \
   --windowed \
   --onedir \
   --add-data ".env.example:." \
   --add-data "ajiya_sample_orders.csv:." \
   --add-data "sample_orders.csv:." \
-  app.py
+  qt_app.py
+
+APP_BUNDLE="dist/BentoAutoOrder.app"
+TMP_SIGN_DIR="/tmp/bento_auto_order_sign"
+TMP_APP="$TMP_SIGN_DIR/BentoAutoOrder.app"
+
+rm -rf "$TMP_SIGN_DIR"
+mkdir -p "$TMP_SIGN_DIR"
+ditto --norsrc "$APP_BUNDLE" "$TMP_APP"
+codesign --remove-signature "$TMP_APP" 2>/dev/null || true
+codesign --force --deep --sign - "$TMP_APP"
+ditto --norsrc "$TMP_APP" "$APP_BUNDLE"
 
 echo "Build complete."
 echo "Output: dist/BentoAutoOrder.app"

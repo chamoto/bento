@@ -38,10 +38,7 @@ Windowsで `setup_windows.bat` をダブルクリックします。
 ORDER_SITE_LOGIN_URL=https://example.com/login
 ORDER_SITE_USERNAME=your_username
 ORDER_SITE_PASSWORD=your_password
-ORDER_SITE_DAY1_URL=https://example.com/order/day1
-ORDER_SITE_DAY2_URL=https://example.com/order/day2
-ORDER_SITE_DAY3_URL=https://example.com/order/day3
-ORDER_SITE_DAY4_URL=https://example.com/order/day4
+ORDER_SITE_ORDER_URL=https://example.com/order
 CSV_PATH=ajiya_sample_orders.csv
 ```
 

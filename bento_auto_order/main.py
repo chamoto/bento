@@ -64,6 +64,20 @@ def aggregate_orders(df: pd.DataFrame) -> dict[str, dict[str, int]]:
     return aggregated
 
 
+def aggregate_total_orders(df: pd.DataFrame) -> dict[str, int]:
+    order_columns = get_order_columns(df)
+    aggregated: dict[str, int] = {}
+
+    for order_column in order_columns:
+        for raw_bento_no in df[order_column]:
+            bento_no = normalize_bento_no(raw_bento_no)
+            if bento_no is None:
+                continue
+            aggregated[bento_no] = aggregated.get(bento_no, 0) + 1
+
+    return aggregated
+
+
 def print_summary(aggregated: dict[str, dict[str, int]]) -> None:
     print("=== 弁当注文 集計結果 ===")
     for day_key, orders in aggregated.items():
@@ -74,6 +88,20 @@ def print_summary(aggregated: dict[str, dict[str, int]]) -> None:
 
         for bento_no in sorted(orders, key=sort_bento_no):
             print(f"  弁当番号 {bento_no}: {orders[bento_no]}個")
+
+
+def print_total_summary(orders: dict[str, int]) -> None:
+    print("=== 弁当注文 一括集計結果 ===")
+    if not orders:
+        print("注文なし")
+        return
+
+    total = 0
+    for bento_no in sorted(orders, key=sort_bento_no):
+        quantity = orders[bento_no]
+        total += quantity
+        print(f"弁当番号 {bento_no}: {quantity}個")
+    print(f"合計: {total}個")
 
 
 def sort_bento_no(value: str) -> tuple[int, int | str]:
@@ -120,6 +148,10 @@ def build_day_url(day_key: str) -> str:
     return ""
 
 
+def build_order_url() -> str:
+    return config.ORDER_URL or config.DAY_URLS.get("day1", "") or config.LOGIN_URL
+
+
 def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
     day_url = build_day_url(day_key)
     if not day_url:
@@ -139,6 +171,30 @@ def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
             print(f"{day_key}: 弁当番号 {bento_no} に {quantity} 個を入力しました。")
         else:
             print(f"警告: {day_key} の弁当番号 {bento_no} の数量欄が見つかりません。")
+            if not warned_available_numbers:
+                print(f"このページで検出できた弁当番号: {', '.join(get_available_bento_numbers(page))}")
+                warned_available_numbers = True
+
+
+def fill_bulk_orders(page, orders: dict[str, int]) -> None:
+    order_url = build_order_url()
+    if not order_url:
+        raise ValueError("注文ページURLが未設定です。.env の ORDER_SITE_ORDER_URL または ORDER_SITE_DAY1_URL を確認してください。")
+
+    if page.url != order_url:
+        page.goto(order_url)
+        page.wait_for_load_state("networkidle")
+
+    if not orders:
+        print("入力する注文がありません。")
+        return
+
+    warned_available_numbers = False
+    for bento_no, quantity in sorted(orders.items(), key=lambda item: sort_bento_no(item[0])):
+        if fill_quantity_by_bento_no(page, bento_no, quantity):
+            print(f"弁当番号 {bento_no} に {quantity} 個を入力しました。")
+        else:
+            print(f"警告: 弁当番号 {bento_no} の数量欄が見つかりません。")
             if not warned_available_numbers:
                 print(f"このページで検出できた弁当番号: {', '.join(get_available_bento_numbers(page))}")
                 warned_available_numbers = True
@@ -203,14 +259,16 @@ def get_available_bento_numbers(page) -> list[str]:
 
 
 def run() -> None:
+    config.load_settings()
+
     if sync_playwright is None:
         raise RuntimeError(
             "Playwright がインストールされていません。"
             " `pip install -r requirements.txt` と `playwright install` を実行してください。"
         )
 
-    aggregated = aggregate_orders(load_orders(config.CSV_PATH))
-    print_summary(aggregated)
+    aggregated = aggregate_total_orders(load_orders(config.CSV_PATH))
+    print_total_summary(aggregated)
 
     with sync_playwright() as playwright:
         launch_options = {"headless": False}
@@ -229,8 +287,7 @@ def run() -> None:
 
         try:
             login(page)
-            for day_key, orders in aggregated.items():
-                fill_day_orders(page, day_key, orders)
+            fill_bulk_orders(page, aggregated)
 
             print("\n入力が完了しました。注文確定ボタンは自動クリックしていません。")
             print("ブラウザを開いたまま停止します。内容を確認し、必要なら手動で注文確定してください。")
