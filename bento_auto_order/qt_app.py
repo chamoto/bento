@@ -34,7 +34,7 @@ DEFAULT_CSV_PATH = APP_DIR / "ajiya_sample_orders.csv"
 
 def ensure_app_files() -> None:
     APP_DIR.mkdir(parents=True, exist_ok=True)
-    for file_name in ["ajiya_sample_orders.csv", "sample_orders.csv"]:
+    for file_name in ["ajiya_sample_orders.csv", "sample_orders.csv", "google_form_sample_orders.csv"]:
         source = RESOURCE_DIR / file_name
         destination = APP_DIR / file_name
         if not destination.exists() and source.exists():

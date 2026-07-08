@@ -20,6 +20,7 @@ pyinstaller ^
   --add-data ".env.example;." ^
   --add-data "ajiya_sample_orders.csv;." ^
   --add-data "sample_orders.csv;." ^
+  --add-data "google_form_sample_orders.csv;." ^
   qt_app.py
 
 echo.

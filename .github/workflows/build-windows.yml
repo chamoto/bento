@@ -37,6 +37,7 @@ jobs:
             --add-data ".env.example;." `
             --add-data "ajiya_sample_orders.csv;." `
             --add-data "sample_orders.csv;." `
+            --add-data "google_form_sample_orders.csv;." `
             qt_app.py
 
       - name: Prepare artifact
@@ -47,6 +48,7 @@ jobs:
           Copy-Item README.md dist\BentoAutoOrder-windows\README.md
           Copy-Item WINDOWS_README.md dist\BentoAutoOrder-windows\WINDOWS_README.md
           Copy-Item .env.example dist\BentoAutoOrder-windows\.env.example
+          Copy-Item google_form_sample_orders.csv dist\BentoAutoOrder-windows\google_form_sample_orders.csv
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
