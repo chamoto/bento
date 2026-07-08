@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -18,9 +19,25 @@ import config
 import site_selectors
 
 
-BASE_COLUMNS = {"timestamp", "name", "note"}
+BASE_COLUMNS = {
+    "timestamp",
+    "name",
+    "note",
+    "email",
+    "email address",
+    "タイムスタンプ",
+    "氏名",
+    "名前",
+    "メールアドレス",
+    "メール",
+    "備考",
+    "メモ",
+}
+TIMESTAMP_COLUMNS = {"timestamp", "タイムスタンプ"}
+NAME_COLUMNS = {"name", "氏名", "名前"}
 LEGACY_DAY_KEYS = ["day1", "day2", "day3", "day4"]
 SKIP_VALUES = {"", "なし", "不要", "未選択", "nan", "none", "null"}
+FULL_WIDTH_DIGITS = str.maketrans("０１２３４５６７８９", "0123456789")
 
 
 def load_orders(csv_path: str | Path) -> pd.DataFrame:
@@ -29,22 +46,33 @@ def load_orders(csv_path: str | Path) -> pd.DataFrame:
         raise FileNotFoundError(f"CSVファイルが見つかりません: {path}")
 
     df = pd.read_csv(path, dtype=str, keep_default_na=False)
-    missing_columns = [column for column in ["timestamp", "name"] if column not in df.columns]
-    if missing_columns:
-        raise ValueError(f"CSVに必須カラムがありません: {', '.join(missing_columns)}")
+    normalized_columns = {column.strip().lstrip("\ufeff") for column in df.columns}
+    if not normalized_columns.intersection(TIMESTAMP_COLUMNS):
+        raise ValueError("CSVに必須カラムがありません: timestamp または タイムスタンプ")
+    if not normalized_columns.intersection(NAME_COLUMNS):
+        raise ValueError("CSVに必須カラムがありません: name または 氏名")
 
     return df
 
 
 def get_order_columns(df: pd.DataFrame) -> list[str]:
-    order_columns = [column for column in df.columns if column not in BASE_COLUMNS]
+    order_columns = [column for column in df.columns if column.strip().lstrip("\ufeff") not in BASE_COLUMNS]
     if not order_columns:
-        raise ValueError("注文対象の列がありません。day1〜day4 または YYYY-MM-DD の日付列を用意してください。")
+        raise ValueError("注文対象の列がありません。day1〜day4 または 7月14日 のような日付列を用意してください。")
     return order_columns
 
 
 def normalize_bento_no(value: object) -> str | None:
-    bento_no = str(value).strip()
+    raw_value = str(value).strip()
+    if raw_value.lower() in SKIP_VALUES:
+        return None
+
+    normalized_value = raw_value.translate(FULL_WIDTH_DIGITS)
+    match = re.match(r"^([0-9]+)", normalized_value)
+    if match:
+        return match.group(1)
+
+    bento_no = normalized_value.strip()
     if bento_no.lower() in SKIP_VALUES:
         return None
     return bento_no

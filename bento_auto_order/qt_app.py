@@ -78,7 +78,7 @@ def update_env_value(key: str, value: str) -> None:
 
 
 def format_summary(orders: dict[str, int], csv_path: Path) -> str:
-    lines = ["=== 一括集計結果 ===", f"CSV: {csv_path}", ""]
+    lines = ["=== 発注合計数 ===", f"CSV: {csv_path}", ""]
     if not orders:
         lines.append("注文なし")
         return "\n".join(lines)
@@ -151,7 +151,7 @@ class BentoAutoOrderWindow(QMainWindow):
         title.setStyleSheet("font-size: 24px; font-weight: 700;")
         layout.addWidget(title)
 
-        notice = QLabel("CSVを集計して注文サイトへ数量入力します。注文確定ボタンは自動で押しません。")
+        notice = QLabel("日付や氏名に関係なく、弁当番号ごとの発注合計数を集計します。注文確定ボタンは自動で押しません。")
         notice.setStyleSheet("color: #444;")
         layout.addWidget(notice)
 
