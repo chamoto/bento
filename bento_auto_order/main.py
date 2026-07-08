@@ -58,7 +58,7 @@ def load_orders(csv_path: str | Path) -> pd.DataFrame:
 def get_order_columns(df: pd.DataFrame) -> list[str]:
     order_columns = [column for column in df.columns if column.strip().lstrip("\ufeff") not in BASE_COLUMNS]
     if not order_columns:
-        raise ValueError("注文対象の列がありません。day1〜day4 または 7月14日 のような日付列を用意してください。")
+        raise ValueError("注文対象の列がありません。day1〜day4、7/14、7月14日 のような日付列を用意してください。")
     return order_columns
 
 
