@@ -31,10 +31,31 @@ build_windows_exe.bat
 Output:
 
 ```text
-dist\BentoAutoOrder\BentoAutoOrder.exe
+dist\BentoAutoOrder.exe
 ```
 
-Distribute the whole `dist\BentoAutoOrder` folder, not only the `.exe`.
+This is a one-file build. PyInstaller bundles Python and DLLs into `BentoAutoOrder.exe`.
+Chrome itself is not bundled; the user's Windows PC should have Google Chrome installed.
+
+## Build Windows App on GitHub
+
+This repo includes a GitHub Actions workflow:
+
+```text
+.github/workflows/build-windows.yml
+```
+
+After pushing to `main`, open GitHub Actions and download the artifact:
+
+```text
+BentoAutoOrder-windows
+```
+
+Inside the downloaded zip, run:
+
+```text
+BentoAutoOrder-windows\BentoAutoOrder.exe
+```
 
 ## Build on Mac
 

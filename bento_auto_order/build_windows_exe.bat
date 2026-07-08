@@ -16,7 +16,7 @@ pyinstaller ^
   --clean ^
   --name BentoAutoOrder ^
   --windowed ^
-  --onedir ^
+  --onefile ^
   --add-data ".env.example;." ^
   --add-data "ajiya_sample_orders.csv;." ^
   --add-data "sample_orders.csv;." ^
@@ -24,5 +24,5 @@ pyinstaller ^
 
 echo.
 echo Build complete.
-echo Output: dist\BentoAutoOrder\BentoAutoOrder.exe
+echo Output: dist\BentoAutoOrder.exe
 pause

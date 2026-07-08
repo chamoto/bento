@@ -68,4 +68,16 @@ CSVはWindows Excelで文字化けしにくい `UTF-8 BOM付き` で保存して
 
 Pythonを入れずに使いたい場合は、PyInstallerで `.exe` 化できます。
 
-ただしPlaywrightのブラウザ同梱やパス調整が少し面倒なので、まずは `.bat` 配布がおすすめです。
+Windows版はDLL込みの1ファイルexeとして作ります。
+
+```bat
+build_windows_exe.bat
+```
+
+出力:
+
+```text
+dist\BentoAutoOrder.exe
+```
+
+Google Chrome自体は同梱しないので、利用者のWindows PCにChromeを入れてください。
