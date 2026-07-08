@@ -12,7 +12,7 @@ import config
 import main
 
 
-APP_DIR = Path(__file__).resolve().parent
+APP_DIR = config.BASE_DIR
 ENV_PATH = APP_DIR / ".env"
 DEFAULT_CSV_PATH = APP_DIR / "ajiya_sample_orders.csv"
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 try:
@@ -10,7 +11,13 @@ except ModuleNotFoundError:
         return False
 
 
-BASE_DIR = Path(__file__).resolve().parent
+def app_base_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+BASE_DIR = app_base_dir()
 load_dotenv(BASE_DIR / ".env")
 
 def env_value(name: str, default: str = "") -> str:
@@ -33,6 +40,7 @@ DAY_URLS = {
     "day4": env_value("ORDER_SITE_DAY4_URL"),
 }
 DAILY_URL_TEMPLATE = env_value("ORDER_SITE_DAILY_URL_TEMPLATE")
+BROWSER_CHANNEL = env_value("ORDER_BROWSER_CHANNEL", "chrome")
 
 LOGIN_TIMEOUT_MS = 10_000
 SELECTOR_TIMEOUT_MS = 5_000

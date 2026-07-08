@@ -213,7 +213,17 @@ def run() -> None:
     print_summary(aggregated)
 
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=False)
+        launch_options = {"headless": False}
+        if config.BROWSER_CHANNEL:
+            launch_options["channel"] = config.BROWSER_CHANNEL
+
+        try:
+            browser = playwright.chromium.launch(**launch_options)
+        except Exception:
+            if not config.BROWSER_CHANNEL:
+                raise
+            print(f"Chrome channel '{config.BROWSER_CHANNEL}' が使えないため、Playwright Chromiumで再試行します。")
+            browser = playwright.chromium.launch(headless=False)
         context = browser.new_context()
         page = context.new_page()
 
