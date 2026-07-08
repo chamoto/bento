@@ -258,6 +258,12 @@ def get_available_bento_numbers(page) -> list[str]:
     )
 
 
+def wait_for_human_review(page, browser) -> None:
+    print("ブラウザを開いたまま待機します。内容確認後、ブラウザを手動で閉じてください。")
+    while browser.is_connected() and not page.is_closed():
+        page.wait_for_timeout(1_000)
+
+
 def run() -> None:
     config.load_settings()
 
@@ -290,8 +296,8 @@ def run() -> None:
             fill_bulk_orders(page, aggregated)
 
             print("\n入力が完了しました。注文確定ボタンは自動クリックしていません。")
-            print("ブラウザを開いたまま停止します。内容を確認し、必要なら手動で注文確定してください。")
-            page.pause()
+            print("内容を確認し、必要なら手動で注文確定してください。")
+            wait_for_human_review(page, browser)
         finally:
             print("処理を終了します。ブラウザを閉じる場合は手動で閉じてください。")
 
