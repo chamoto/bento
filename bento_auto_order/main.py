@@ -151,6 +151,95 @@ def is_gui_mode() -> bool:
     return os.getenv("BENTO_AUTO_ORDER_GUI", "").strip() == "1" or getattr(sys, "frozen", False)
 
 
+def first_visible_locator(page, selectors: list[str], timeout_ms: int = 2_000):
+    for selector in selectors:
+        locator = page.locator(selector).first
+        try:
+            locator.wait_for(state="visible", timeout=timeout_ms)
+            return locator, selector
+        except PlaywrightTimeoutError:
+            continue
+    return None, ""
+
+
+def fill_login_credentials(page) -> None:
+    username_selectors = [
+        site_selectors.USERNAME_INPUT_SELECTOR,
+        'input[name="login_id"]',
+        'input[name="loginId"]',
+        'input[name="login"]',
+        'input[name="user"]',
+        'input[name="userid"]',
+        'input[name="user_id"]',
+        'input[name="email"]',
+        'input[type="email"]',
+        'input[id*="login" i]',
+        'input[id*="user" i]',
+        'input[id*="mail" i]',
+        'input[name*="login" i]',
+        'input[name*="user" i]',
+        'input[name*="mail" i]',
+        'input[name*="id" i]',
+    ]
+    password_selectors = [
+        site_selectors.PASSWORD_INPUT_SELECTOR,
+        'input[type="password"]',
+        'input[name="password"]',
+        'input[name="passwd"]',
+        'input[name="pass"]',
+        'input[id*="password" i]',
+        'input[id*="passwd" i]',
+        'input[id*="pass" i]',
+    ]
+
+    password_locator, password_selector = first_visible_locator(page, password_selectors)
+    username_locator, username_selector = first_visible_locator(page, username_selectors)
+
+    if password_locator is None:
+        raise RuntimeError(
+            "ログイン画面のパスワード入力欄が見つかりません。"
+            " site_selectors.PASSWORD_INPUT_SELECTOR を実際のHTMLに合わせてください。"
+        )
+
+    if username_locator is None:
+        username_locator = page.locator(
+            "input:not([type='hidden']):not([type='password']):not([type='submit']):not([type='button'])"
+        ).first
+        try:
+            username_locator.wait_for(state="visible", timeout=config.SELECTOR_TIMEOUT_MS)
+            username_selector = "first visible non-password input"
+        except PlaywrightTimeoutError as exc:
+            raise RuntimeError(
+                "ログイン画面のID入力欄が見つかりません。"
+                " site_selectors.USERNAME_INPUT_SELECTOR を実際のHTMLに合わせてください。"
+            ) from exc
+
+    print(f"ログインID入力欄: {username_selector}")
+    print(f"パスワード入力欄: {password_selector}")
+    username_locator.fill(config.ORDER_SITE_USERNAME)
+    password_locator.fill(config.ORDER_SITE_PASSWORD)
+
+
+def click_login_button(page) -> None:
+    button_selectors = [
+        site_selectors.LOGIN_BUTTON_SELECTOR,
+        'button[type="submit"]',
+        'input[type="submit"]',
+        'button:has-text("ログイン")',
+        'input[value*="ログイン"]',
+        'button:has-text("Login")',
+        'input[value*="Login"]',
+    ]
+    button_locator, button_selector = first_visible_locator(page, button_selectors)
+    if button_locator is not None:
+        print(f"ログインボタン: {button_selector}")
+        button_locator.click()
+        return
+
+    print("ログインボタンが見つからないため、パスワード欄でEnterを押します。")
+    page.keyboard.press("Enter")
+
+
 def login(page) -> None:
     if not config.LOGIN_URL:
         raise ValueError("ORDER_SITE_LOGIN_URL が未設定です。.env を確認してください。")
@@ -174,9 +263,8 @@ def login(page) -> None:
             page.wait_for_timeout(config.MANUAL_LOGIN_WAIT_MS)
         return
 
-    page.fill(site_selectors.USERNAME_INPUT_SELECTOR, config.ORDER_SITE_USERNAME)
-    page.fill(site_selectors.PASSWORD_INPUT_SELECTOR, config.ORDER_SITE_PASSWORD)
-    page.click(site_selectors.LOGIN_BUTTON_SELECTOR)
+    fill_login_credentials(page)
+    click_login_button(page)
 
     try:
         page.wait_for_selector(site_selectors.LOGIN_SUCCESS_SELECTOR, timeout=config.LOGIN_TIMEOUT_MS)
