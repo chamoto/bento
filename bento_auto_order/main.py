@@ -152,7 +152,7 @@ def is_gui_mode() -> bool:
     return os.getenv("BENTO_AUTO_ORDER_GUI", "").strip() == "1" or getattr(sys, "frozen", False)
 
 
-def first_visible_locator(page, selectors: list[str], timeout_ms: int = 2_000):
+def first_visible_locator(page, selectors: list[str], timeout_ms: int = 300):
     for selector in selectors:
         locator = page.locator(selector).first
         try:
@@ -165,8 +165,8 @@ def first_visible_locator(page, selectors: list[str], timeout_ms: int = 2_000):
 
 def fill_login_credentials(page) -> None:
     username_selectors = [
-        site_selectors.USERNAME_INPUT_SELECTOR,
         'input[name="login_id"]',
+        site_selectors.USERNAME_INPUT_SELECTOR,
         'input[name="loginId"]',
         'input[name="login"]',
         'input[name="user"]',
@@ -240,7 +240,7 @@ def click_login_button(page) -> None:
     button_locator, button_selector = first_visible_locator(page, button_selectors)
     if button_locator is not None:
         print(f"ログインボタン: {button_selector}")
-        button_locator.click()
+        button_locator.click(no_wait_after=True)
         return
 
     print("ログインボタンが見つからないため、パスワード欄でEnterを押します。")
@@ -271,21 +271,13 @@ def login(page) -> None:
     fill_login_credentials(page)
     click_login_button(page)
 
-    try:
-        page.wait_for_load_state("domcontentloaded", timeout=config.LOGIN_TIMEOUT_MS)
-    except PlaywrightTimeoutError:
-        pass
-
+    page.wait_for_timeout(1_500)
+    if login_form_still_visible(page):
+        page.wait_for_timeout(1_500)
     if login_form_still_visible(page):
         raise RuntimeError("ログイン後もログイン画面のままです。ログインIDとパスワードを確認してください。")
 
-    try:
-        page.wait_for_selector(site_selectors.LOGIN_SUCCESS_SELECTOR, timeout=config.LOGIN_TIMEOUT_MS)
-    except PlaywrightTimeoutError as exc:
-        raise RuntimeError(
-            "ログイン成功を確認できませんでした。"
-            " site_selectors.LOGIN_SUCCESS_SELECTOR やログイン情報を確認してください。"
-        ) from exc
+    print("ログイン画面を通過しました。")
 
 
 def build_day_url(day_key: str) -> str:
@@ -310,8 +302,7 @@ def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
         print(f"警告: {day_key} の注文ページURLが未設定のためスキップします。")
         return
 
-    page.goto(day_url)
-    page.wait_for_load_state("networkidle")
+    page.goto(day_url, wait_until="domcontentloaded")
 
     if not orders:
         print(f"{day_key}: 入力する注文がありません。")
@@ -334,8 +325,7 @@ def fill_bulk_orders(page, orders: dict[str, int]) -> None:
         raise ValueError("注文ページURLが未設定です。アプリ内設定を確認してください。")
 
     if page.url != order_url:
-        page.goto(order_url)
-        page.wait_for_load_state("networkidle")
+        page.goto(order_url, wait_until="domcontentloaded")
 
     if not orders:
         print("入力する注文がありません。")
