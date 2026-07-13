@@ -218,6 +218,12 @@ def fill_login_credentials(page) -> None:
     print(f"パスワード入力欄: {password_selector}")
     username_locator.fill(config.ORDER_SITE_USERNAME)
     password_locator.fill(config.ORDER_SITE_PASSWORD)
+    username_value = username_locator.input_value(timeout=config.SELECTOR_TIMEOUT_MS)
+    password_value = password_locator.input_value(timeout=config.SELECTOR_TIMEOUT_MS)
+    if username_value:
+        print("ログインIDを入力しました。")
+    if password_value:
+        print("パスワードを入力しました。")
 
 
 def click_login_button(page) -> None:
@@ -244,8 +250,7 @@ def login(page) -> None:
     if not config.LOGIN_URL:
         raise ValueError("ORDER_SITE_LOGIN_URL が未設定です。.env を確認してください。")
 
-    page.goto(config.LOGIN_URL)
-    page.wait_for_load_state("networkidle")
+    page.goto(config.LOGIN_URL, wait_until="domcontentloaded")
 
     if config.LOGIN_URL.startswith("file://") or Path(config.LOGIN_URL).exists():
         print("\nローカルHTMLを開いているため、ログイン処理をスキップします。")
@@ -314,7 +319,7 @@ def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
 def fill_bulk_orders(page, orders: dict[str, int]) -> None:
     order_url = build_order_url()
     if not order_url:
-        raise ValueError("注文ページURLが未設定です。.env の ORDER_SITE_ORDER_URL または ORDER_SITE_DAY1_URL を確認してください。")
+        raise ValueError("注文ページURLが未設定です。.env の ORDER_SITE_ORDER_URL を確認してください。")
 
     if page.url != order_url:
         page.goto(order_url)
