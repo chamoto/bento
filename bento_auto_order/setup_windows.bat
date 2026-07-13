@@ -34,12 +34,7 @@ pip install -r requirements.txt
 echo Installing Playwright browser...
 playwright install chromium
 
-if not exist ".env" (
-  copy ".env.example" ".env" >nul
-  echo Created .env from .env.example
-)
-
 echo.
 echo Setup complete.
-echo Edit .env, then run start_app_windows.bat.
+echo Run start_app_windows.bat.
 pause

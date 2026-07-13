@@ -9,15 +9,14 @@ There is no reliable single executable that runs on both Windows and Mac.
 
 ## Browser policy
 
-This app uses Playwright, but the packaged app defaults to installed Google Chrome:
+This app uses Playwright, but the packaged app defaults to installed Google Chrome.
 
-```env
-ORDER_BROWSER_CHANNEL=chrome
-```
+The browser channel, login URL, and order URL are built into the app config.
+The order date, user ID, and password are entered in the app UI at runtime; the password is not saved.
 
 This avoids bundling Chromium into the app and keeps the package smaller.
 
-If Chrome is not installed, install Chrome or remove `ORDER_BROWSER_CHANNEL=chrome` and install Playwright Chromium separately.
+If Chrome is not installed, install Chrome. On Windows, the app also tries Microsoft Edge.
 
 ## Build on Windows
 

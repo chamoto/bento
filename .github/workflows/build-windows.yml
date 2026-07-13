@@ -34,7 +34,6 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller -y --clean --name BentoAutoOrder --windowed --onefile `
-            --add-data ".env.example;." `
             --add-data "ajiya_sample_orders.csv;." `
             --add-data "sample_orders.csv;." `
             --add-data "google_form_sample_orders.csv;." `
@@ -48,17 +47,8 @@ jobs:
           Copy-Item dist\BentoAutoOrder.exe dist\BentoAutoOrder-windows\BentoAutoOrder.exe
           Copy-Item README.md dist\BentoAutoOrder-windows\README.md
           Copy-Item WINDOWS_README.md dist\BentoAutoOrder-windows\WINDOWS_README.md
-          Copy-Item .env.example dist\BentoAutoOrder-windows\.env.example
-          Copy-Item .env.example dist\BentoAutoOrder-windows\.env
           Copy-Item google_form_sample_orders.csv dist\BentoAutoOrder-windows\google_form_sample_orders.csv
           Copy-Item google_form_count_result.csv dist\BentoAutoOrder-windows\google_form_count_result.csv
-
-          $envFile = "dist\BentoAutoOrder-windows\.env"
-          $username = Select-String -Path $envFile -Pattern "^ORDER_SITE_USERNAME=(.+)$"
-          $password = Select-String -Path $envFile -Pattern "^ORDER_SITE_PASSWORD=(.+)$"
-          if ($username -or $password) {
-            throw "Artifact .env must not contain ORDER_SITE_USERNAME or ORDER_SITE_PASSWORD values."
-          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

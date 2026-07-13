@@ -10,5 +10,5 @@ if not exist ".venv\Scripts\activate.bat" (
 )
 
 call ".venv\Scripts\activate.bat"
-python app.py
+python qt_app.py
 pause

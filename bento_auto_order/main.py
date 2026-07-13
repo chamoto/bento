@@ -4,6 +4,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlencode
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -248,7 +249,7 @@ def click_login_button(page) -> None:
 
 def login(page) -> None:
     if not config.LOGIN_URL:
-        raise ValueError("ORDER_SITE_LOGIN_URL が未設定です。.env を確認してください。")
+        raise ValueError("ログインURLが未設定です。アプリ内設定を確認してください。")
 
     page.goto(config.LOGIN_URL, wait_until="domcontentloaded")
 
@@ -257,14 +258,13 @@ def login(page) -> None:
         return
 
     if not config.ORDER_SITE_USERNAME or not config.ORDER_SITE_PASSWORD:
-        print("\nORDER_SITE_USERNAME または ORDER_SITE_PASSWORD が空です。")
+        print("\nログインID または パスワード が空です。")
         print("ブラウザで手動ログインしてください。")
         if sys.stdin and sys.stdin.isatty() and not is_gui_mode():
             input("手動ログインが終わったら Enter: ")
         else:
             wait_seconds = max(1, config.MANUAL_LOGIN_WAIT_MS // 1000)
             print(f"Windowsアプリ実行中のため、Enter入力は使いません。{wait_seconds}秒待ってから注文ページへ進みます。")
-            print("待ち時間が足りない場合は .env の ORDER_SITE_MANUAL_LOGIN_WAIT_MS を増やしてください。")
             page.wait_for_timeout(config.MANUAL_LOGIN_WAIT_MS)
         return
 
@@ -289,7 +289,11 @@ def build_day_url(day_key: str) -> str:
 
 
 def build_order_url() -> str:
-    return config.ORDER_URL or config.DAY_URLS.get("day1", "") or config.LOGIN_URL
+    order_url = config.ORDER_URL or config.DAY_URLS.get("day1", "") or config.LOGIN_URL
+    if config.ORDER_DATE and order_url:
+        separator = "&" if "?" in order_url else "?"
+        return f"{order_url}{separator}{urlencode({'date': config.ORDER_DATE})}"
+    return order_url
 
 
 def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
@@ -319,7 +323,7 @@ def fill_day_orders(page, day_key: str, orders: dict[str, int]) -> None:
 def fill_bulk_orders(page, orders: dict[str, int]) -> None:
     order_url = build_order_url()
     if not order_url:
-        raise ValueError("注文ページURLが未設定です。.env の ORDER_SITE_ORDER_URL を確認してください。")
+        raise ValueError("注文ページURLが未設定です。アプリ内設定を確認してください。")
 
     if page.url != order_url:
         page.goto(order_url)
@@ -439,7 +443,19 @@ def launch_visible_browser(playwright):
 
 
 def run() -> None:
+    current_csv_path = config.CSV_PATH
+    current_username = config.ORDER_SITE_USERNAME
+    current_password = config.ORDER_SITE_PASSWORD
+    current_order_date = config.ORDER_DATE
     config.load_settings()
+    if current_csv_path:
+        config.CSV_PATH = current_csv_path
+    if current_username:
+        config.ORDER_SITE_USERNAME = current_username
+    if current_password:
+        config.ORDER_SITE_PASSWORD = current_password
+    if current_order_date:
+        config.ORDER_DATE = current_order_date
 
     if sync_playwright is None:
         raise RuntimeError(

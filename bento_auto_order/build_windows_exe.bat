@@ -17,7 +17,6 @@ pyinstaller ^
   --name BentoAutoOrder ^
   --windowed ^
   --onefile ^
-  --add-data ".env.example;." ^
   --add-data "ajiya_sample_orders.csv;." ^
   --add-data "sample_orders.csv;." ^
   --add-data "google_form_sample_orders.csv;." ^

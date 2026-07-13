@@ -17,8 +17,6 @@ https://www.python.org/downloads/windows/
 - `.venv`
 - `.env`
 
-`.env.example` は入れてOKです。
-
 ## 3. 初回セットアップ
 
 Windowsで `setup_windows.bat` をダブルクリックします。
@@ -28,35 +26,27 @@ Windowsで `setup_windows.bat` をダブルクリックします。
 - 仮想環境 `.venv` を作成
 - 必要なPythonパッケージをインストール
 - PlaywrightのChromiumをインストール
-- `.env` がなければ作成
 
-## 4. .envを編集
-
-`.env` をメモ帳などで開き、注文サイト情報とCSVパスを設定します。ID・パスワードは配布時点では空欄です。
-
-```env
-ORDER_SITE_LOGIN_URL=https://example.com/login
-ORDER_SITE_USERNAME=
-ORDER_SITE_PASSWORD=
-ORDER_SITE_ORDER_URL=https://example.com/order
-ORDER_BROWSER_CHANNEL=chrome
-ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000
-CSV_PATH=ajiya_sample_orders.csv
-```
-
-Chromeを起動できない場合は、Microsoft Edgeへ自動で切り替えます。
-ID・パスワードを空にした場合は、ブラウザで手動ログインしてください。GUI版では `ORDER_SITE_MANUAL_LOGIN_WAIT_MS` の時間だけ待ってから注文ページへ進みます。
-
-## 5. 起動
+## 4. 起動
 
 `start_app_windows.bat` をダブルクリックします。
 
 GUIアプリが開きます。
 
+注文サイトURLはアプリ内に固定されています。注文日はアプリ画面のプルダウンから選び、ログインIDとパスワードはアプリ画面で入力してください。ログインIDは「IDを記憶」にチェックした場合だけ保存できます。パスワードは保存しません。注文日の候補は4日後から再来月末までです。
+
+注文日は以下のURLの `date=` 部分として使います。
+
+```text
+https://reitou.ajiya-lunch.net/daily/?date=2026-07-28
+```
+
+Chromeを起動できない場合は、Microsoft Edgeへ自動で切り替えます。
+
 - `CSVを開く`: CSVをExcelなどで開く
 - `CSVを選ぶ`: 別のCSVを選ぶ
+- `注文日`: 自動入力する注文ページの日付をプルダウンから選ぶ
 - `集計`: 集計を確認する
-- `設定を開く`: `.env` を開く
 - `ログを開く`: 実行ログを開く
 - `自動入力`: ブラウザを開いて注文ページへ入力する
 
@@ -66,7 +56,7 @@ GUIアプリが開きます。
 
 GUIの `CSVを開く` を押してください。
 
-`.env` の `CSV_PATH` に設定されたCSVを開きます。未設定の場合は `ajiya_sample_orders.csv` を開きます。
+選択中のCSVを開きます。初期状態ではサンプルCSVを開きます。
 
 CSVはWindows Excelで文字化けしにくい `UTF-8 BOM付き` で保存しています。
 読み込みは `UTF-8 BOM付き`、`UTF-8`、`Shift_JIS(CP932)` に対応しています。

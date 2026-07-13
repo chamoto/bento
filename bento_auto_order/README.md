@@ -23,8 +23,8 @@ playwright install
 Windows:
 
 1. `setup_windows.bat` をダブルクリック
-2. `.env` を編集
-3. `start_app_windows.bat` をダブルクリック
+2. `start_app_windows.bat` をダブルクリック
+3. アプリ画面でCSV、注文日、ログインID、パスワードを入力
 
 詳しくは `WINDOWS_README.md` を見てください。
 
@@ -39,29 +39,23 @@ playwright install chromium
 python qt_app.py
 ```
 
-## .env の作り方
+## ログイン情報
 
-`.env.example` をコピーして `.env` を作成します。
+`.env` は使いません。注文サイトURLはアプリ内に固定しています。
 
-```bash
-cp .env.example .env
+ログインIDとパスワードはアプリ画面で入力します。ログインIDは「IDを記憶」にチェックした場合だけ保存できます。パスワードは保存しません。
+
+## 注文日
+
+注文日はアプリ画面のプルダウンから選びます。候補は4日後から再来月末までです。
+
+入力した日付から以下のURLを自動生成します。
+
+```text
+https://reitou.ajiya-lunch.net/daily/?date=2026-07-28
 ```
 
-`.env` にログインURL、注文ページURL、CSVパスを設定してください。ID・パスワードは配布時点では空欄です。
-
-```env
-ORDER_SITE_LOGIN_URL=https://example.com/login
-ORDER_SITE_USERNAME=
-ORDER_SITE_PASSWORD=
-ORDER_SITE_ORDER_URL=https://example.com/order
-ORDER_BROWSER_CHANNEL=chrome
-ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000
-CSV_PATH=sample_orders.csv
-```
-
-`CSV_PATH` を空にした場合は、同じフォルダの `sample_orders.csv` を読み込みます。
-Windowsでは `ORDER_BROWSER_CHANNEL=chrome` を優先し、Chromeを起動できない場合は Microsoft Edge に切り替えます。
-ID・パスワードを空にした場合、GUI版では `ORDER_SITE_MANUAL_LOGIN_WAIT_MS` の時間だけ手動ログインを待ってから注文ページへ進みます。
+注文画面は日付ごとに異なるため、自動入力前に必ず対象日を確認してください。
 
 ## 実行方法
 
@@ -79,7 +73,7 @@ CLIで直接実行する場合:
 python main.py
 ```
 
-実行すると、まずCSVの集計結果が表示されます。その後、ブラウザを表示した状態で注文サイトへログインし、1枚の注文ページに弁当番号ごとの合計数量を入力します。
+実行すると、まずCSVの集計結果が表示されます。その後、ブラウザを表示した状態で注文サイトへログインし、指定した注文日のページに弁当番号ごとの合計数量を入力します。
 
 集計だけ確認する場合:
 
