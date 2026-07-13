@@ -247,6 +247,14 @@ def click_login_button(page) -> None:
     page.keyboard.press("Enter")
 
 
+def login_form_still_visible(page) -> bool:
+    try:
+        password_locator = page.locator("input[type='password']").first
+        return password_locator.is_visible(timeout=1_000)
+    except PlaywrightError:
+        return False
+
+
 def login(page) -> None:
     if not config.LOGIN_URL:
         raise ValueError("ログインURLが未設定です。アプリ内設定を確認してください。")
@@ -258,18 +266,18 @@ def login(page) -> None:
         return
 
     if not config.ORDER_SITE_USERNAME or not config.ORDER_SITE_PASSWORD:
-        print("\nログインID または パスワード が空です。")
-        print("ブラウザで手動ログインしてください。")
-        if sys.stdin and sys.stdin.isatty() and not is_gui_mode():
-            input("手動ログインが終わったら Enter: ")
-        else:
-            wait_seconds = max(1, config.MANUAL_LOGIN_WAIT_MS // 1000)
-            print(f"Windowsアプリ実行中のため、Enter入力は使いません。{wait_seconds}秒待ってから注文ページへ進みます。")
-            page.wait_for_timeout(config.MANUAL_LOGIN_WAIT_MS)
-        return
+        raise RuntimeError("ログインIDまたはパスワードが未入力です。アプリ画面で入力してください。")
 
     fill_login_credentials(page)
     click_login_button(page)
+
+    try:
+        page.wait_for_load_state("domcontentloaded", timeout=config.LOGIN_TIMEOUT_MS)
+    except PlaywrightTimeoutError:
+        pass
+
+    if login_form_still_visible(page):
+        raise RuntimeError("ログイン後もログイン画面のままです。ログインIDとパスワードを確認してください。")
 
     try:
         page.wait_for_selector(site_selectors.LOGIN_SUCCESS_SELECTOR, timeout=config.LOGIN_TIMEOUT_MS)

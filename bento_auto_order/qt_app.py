@@ -374,6 +374,11 @@ class BentoAutoOrderWindow(QMainWindow):
         username = self.username_input.text().strip()
         password = self.password_input.text()
         order_date = str(self.order_date_input.currentData())
+        if not username or not password:
+            QMessageBox.warning(self, "ログイン情報が未入力です", "ログインIDとパスワードを入力してください。")
+            self.status("ログインIDまたはパスワードが未入力のため、自動入力を開始しませんでした。")
+            return
+
         self.save_login_id_preference()
         config.CSV_PATH = str(csv_path)
         config.ORDER_DATE = order_date
