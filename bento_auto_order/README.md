@@ -47,12 +47,12 @@ python qt_app.py
 cp .env.example .env
 ```
 
-`.env` にログインURL、ログイン情報、注文ページURLを設定してください。
+`.env` にログインURL、注文ページURL、CSVパスを設定してください。ID・パスワードは配布時点では空欄です。
 
 ```env
 ORDER_SITE_LOGIN_URL=https://example.com/login
-ORDER_SITE_USERNAME=your_username
-ORDER_SITE_PASSWORD=your_password
+ORDER_SITE_USERNAME=
+ORDER_SITE_PASSWORD=
 ORDER_SITE_ORDER_URL=https://example.com/order
 ORDER_BROWSER_CHANNEL=chrome
 ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000

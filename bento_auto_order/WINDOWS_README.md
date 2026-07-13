@@ -32,12 +32,12 @@ Windowsで `setup_windows.bat` をダブルクリックします。
 
 ## 4. .envを編集
 
-`.env` をメモ帳などで開き、注文サイト情報とCSVパスを設定します。
+`.env` をメモ帳などで開き、注文サイト情報とCSVパスを設定します。ID・パスワードは配布時点では空欄です。
 
 ```env
 ORDER_SITE_LOGIN_URL=https://example.com/login
-ORDER_SITE_USERNAME=your_username
-ORDER_SITE_PASSWORD=your_password
+ORDER_SITE_USERNAME=
+ORDER_SITE_PASSWORD=
 ORDER_SITE_ORDER_URL=https://example.com/order
 ORDER_BROWSER_CHANNEL=chrome
 ORDER_SITE_MANUAL_LOGIN_WAIT_MS=60000

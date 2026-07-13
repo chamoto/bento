@@ -53,6 +53,13 @@ jobs:
           Copy-Item google_form_sample_orders.csv dist\BentoAutoOrder-windows\google_form_sample_orders.csv
           Copy-Item google_form_count_result.csv dist\BentoAutoOrder-windows\google_form_count_result.csv
 
+          $envFile = "dist\BentoAutoOrder-windows\.env"
+          $username = Select-String -Path $envFile -Pattern "^ORDER_SITE_USERNAME=(.+)$"
+          $password = Select-String -Path $envFile -Pattern "^ORDER_SITE_PASSWORD=(.+)$"
+          if ($username -or $password) {
+            throw "Artifact .env must not contain ORDER_SITE_USERNAME or ORDER_SITE_PASSWORD values."
+          }
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
